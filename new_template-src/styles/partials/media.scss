@@ -1,0 +1,67 @@
+@import "variable";
+// SM
+@media (min-width: 576px) {
+
+}
+
+// MD
+@media (min-width: 768px) {
+
+}
+
+// LG
+@media (min-width: 992px) {
+
+}
+
+// XL
+@media (min-width: 1200px) {
+
+}
+
+// Vertical smartpone position (if needed. It's better to declare all styles in other file)
+@media (max-width: 575px) {
+
+}
+/*
+* Bootstrap fix for card-deck
+*/
+// Bootstrap 4 breakpoints & gutter
+$grid-breakpoints: (
+        xs: 0,
+        sm: 576px,
+        md: 768px,
+        lg: 992px,
+        xl: 1200px
+) !default;
+$grid-gutter-width: 30px !default;
+$cards-per-line: (
+        xs: 1,
+        sm: 2,
+        md: 2,
+        lg: 3,
+        xl: 3
+);
+$cards-per-line-news: (
+        xs: 1,
+        sm: 2,
+        md: 2,
+        lg: 2,
+        xl: 2
+);
+@each $name, $breakpoint in $grid-breakpoints {
+  @media (min-width: $breakpoint) {
+    #specialsTable,
+    #billboardTable,
+    .board .offers {
+      .card-deck .card {
+        flex: 0 0 calc(#{100/map-get($cards-per-line, $name)}*1% - #{$grid-gutter-width});
+      }
+    }
+    .articles {
+      .card-deck .card {
+        flex: 0 0 calc(#{100/map-get($cards-per-line-news, $name)}*1% - #{$grid-gutter-width});
+      }
+    }
+  }
+}
