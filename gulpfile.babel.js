@@ -1,6 +1,6 @@
 'use strict';
-
-import {src, dest, watch, parallel, series} from 'gulp';
+// Import modules
+import {src, dest, watch, parallel, series} from 'gulp'
 import cssMin from 'gulp-clean-css'
 import concat from 'gulp-concat'
 import googleWebFonts from 'gulp-google-webfonts'
@@ -13,15 +13,14 @@ import rimraf from 'rimraf'
 import sass from 'gulp-sass'
 import uglify from 'gulp-uglify-es'
 import sourceMaps from 'gulp-sourcemaps'
-
-const template = 'kiev24'
-
+// Name of 1C Bitrix template
+const template = 'new_template'
+// Declare directories paths
 const dir = {
-    src: `src-${template}`,
-    build: `local/templates/${template}`,
-    nm: `node_modules/`
+    src: `src-${template}`, // source files dir
+    build: `local/templates/${template}`, // build (main 1C Bitrix template) dir
+    nm: `node_modules/` 
 }
-
 // Declare path object with project paths
 const path = {
     build: {
@@ -31,52 +30,46 @@ const path = {
         fonts: `${dir.build}/fonts/`
     },
     src: {
-        js: [
+        js: [ // array of needed frontent scripts
             `${dir.nm}/jquery/dist/jquery.min.js`,
             `${dir.nm}/owl.carousel/dist/owl.carousel.min.js`,
             `${dir.nm}/bootstrap/dist/js/bootstrap.bundle.js`,
             `${dir.nm}/jasny-bootstrap/dist/js/jasny-bootstrap.min.js`,
             `${dir.nm}/lightbox2/src/js/lightbox.js`,
-            `${dir.nm}/jquery.cookie/jquery.cookie.js`,
             `${dir.nm}/js-cookie/src/js.cookie.js`,
             `${dir.src}/js/partials/**/*.js`,
             `${dir.src}/js/helper.js`
         ],
-        scss: [
+        scss: [ // array of needed sass files
             `${dir.nm}/bootstrap/scss/bootstrap.scss`,
             `${dir.nm}/owl.carousel/src/scss/owl.carousel.scss`,
             `${dir.nm}/owl.carousel/src/scss/owl.theme.default.scss`,
-            `${dir.src}/styles/template_styles.scss`
+            `${dir.src}/styles/template_styles.scss` // main source styles file
         ],
-        css: [
+        css: [ // array of needed css files
             `${dir.build}/fonts.css`,
             `${dir.nm}/lightbox2/dist/css/lightbox.css`,
             `${dir.nm}/jasny-bootstrap/dist/css/jasny-bootstrap.css`
         ],
-        fonts: `${dir.src}/fonts/`,
-        images: `${dir.src}/images/**/*.*`,
-        webFonts: 'fonts.list',
-        fontAwesome: 'node_modules/@fortawesome/fontawesome-free/webfonts/*.*'
+        images: `${dir.src}/images/**/*.*`, // source images
+        webFonts: 'fonts.list', // file with custom fonts from Google Fonts
+        fontAwesome: 'node_modules/@fortawesome/fontawesome-free/webfonts/*.*' // FontAwesome font files
     },
     watch: {
-        js: `${dir.src}/js/**/*.js`,
-        styles: `${dir.src}/styles/**/*.scss`,
-        images: `${dir.src}/images/**/*.*`
+        js: `${dir.src}/js/**/*.js`, // handle changes in js
+        styles: `${dir.src}/styles/**/*.scss`, // handle changes in source styles
+        images: `${dir.src}/images/**/*.*` // handle changes in images folder
     },
-    clean: `${dir.build}`
+    clean: `${dir.build}` // path to clear production build
 }
-
 // Options for Google WebFonts
 const options = {
     fontsDir: 'fonts',
     cssDir: ''
-    //cssFilename: 'fonts.css'
 }
-
-// Clean build folder
+// Clean build folder task
 export const clean = (cb) => rimraf(path.clean, cb)
-
-// Download web fonts and put them to source, then copy to build
+// Task: Download web fonts and put them to source, then copy to build
 export const buildFonts = () => {
     let google = src(path.src.webFonts)
         .pipe(googleWebFonts(options))
@@ -87,8 +80,7 @@ export const buildFonts = () => {
 
     return merge(google, fontAwesome);
 }
-
-// Minify images and copy them to build
+// Task: Minify images and copy them to build
 export const buildImages = () => src(path.src.images)
     .pipe(imageMin({
         progressive: true,
@@ -96,8 +88,7 @@ export const buildImages = () => src(path.src.images)
         interlaced: true
     }))
     .pipe(dest(path.build.images))
-
-// Compile one JS-file of all scripts with mapping file
+// Task: Compile one minified JS-file of all scripts with mapping file
 export const buildScripts = () => src(path.src.js)
     .pipe(plumber())
     .pipe(sourceMaps.init())
@@ -106,8 +97,7 @@ export const buildScripts = () => src(path.src.js)
     .pipe(sourceMaps.write('.'))
     .pipe(plumber.stop())
     .pipe(dest(path.build.js))
-
-// Compile CSS-file from all SASS and CSS with mapping and put it to build
+// Task: Compile CSS-file from all SASS and CSS with mapping and put it to build
 export const buildStyles = () => {
     let scssFiles = src(path.src.scss)
         .pipe(sass())
@@ -126,19 +116,15 @@ export const buildStyles = () => {
         .pipe(plumber.stop())
         .pipe(dest(path.build.css))
 }
-
-// Starting watch
+// Starting watch task
 export const devWatch = () => {
     watch(path.watch.styles, buildStyles);
     watch(path.watch.images, buildImages);
     watch(path.watch.js, buildScripts);
 }
-
 // Development Task
 export const dev = series(parallel(buildStyles, buildScripts), devWatch)
-
 // Serve Task
 export const build = series(parallel(buildStyles, buildScripts))
-
 // Default task
 export default dev;
